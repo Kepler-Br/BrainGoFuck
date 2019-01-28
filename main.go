@@ -1,5 +1,8 @@
 package main
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 import "io/ioutil"
 import "errors"
 
@@ -12,15 +15,6 @@ type BrainGoFuck struct {
 	loopStack []int
 }
 
-func (this *BrainGoFuck) ReadFile(fileName string) error {
-	b, err := ioutil.ReadFile(fileName)
-    if err != nil {
-        return errors.New("Cannot open file")
-    }
-    this.source = string(b)
-    return nil
-}
-
 func (this BrainGoFuck) PrintSource() {
 	println(this.source)
 }
@@ -29,9 +23,10 @@ func (this *BrainGoFuck) Step() {
 
 }
 
-func (this *BrainGoFuck) Run() {
+func (this *BrainGoFuck) RunString(bfCode string) {
+	this.source = bfCode
 	for ; this.sourceCarriage < len(this.source); {
-		this.interpretate(string(this.source[this.sourceCarriage]))
+		this.step(string(this.source[this.sourceCarriage]))
 	}
 }
 
@@ -111,7 +106,7 @@ func (this *BrainGoFuck) endLoop() {
 	}
 }
 
-func (this *BrainGoFuck) interpretate(symbol string) {
+func (this *BrainGoFuck) step(symbol string) {
 	switch(symbol) {
 		case ">":
 			this.nextCell()
@@ -152,32 +147,26 @@ func NewBrainGoFuck () BrainGoFuck {
 	return BrainGoFuck{source, memory, memoryCarriage, sourceCarriage, loopStack}
 }
 
-func loopFinder(src string) {
-	var beginLoopPointer uint = 0
-	var endLoopPointer uint = 0
-	endLoopPointer = endLoopPointer
-	loops := -1
-	for i := beginLoopPointer; ; i++ {
-		if i >= uint(len(src)) {
-			panic("OW FUCK! Not closed loop")
-		}
-		if string(src[i]) == "]"  && loops == 0{
-			endLoopPointer = i
-			break
-		}
-		if string(src[i]) == "]"{
-			loops--
-		}
-		if string(src[i]) == "["{
-			loops++
-		}
+func ReadFile(fileName string) (string, error) {
+	code, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return "", errors.New("cannot open file")
 	}
-	println(beginLoopPointer, endLoopPointer)
+	return string(code), nil
 }
 
-
 func main() {
-	var interpretator BrainGoFuck = NewBrainGoFuck()
-	interpretator.ReadFile("hello.bf")
-	interpretator.Run()
+	if len(os.Args) == 1 {
+		println("No file provided.")
+		os.Exit(-1)
+	}
+
+	var filename = os.Args[1]
+	bfCode, err := ReadFile(filename)
+	if err != nil {
+		println("Cannot open file.")
+		os.Exit(-1)
+	}
+	var bfInterpreter = NewBrainGoFuck()
+	bfInterpreter.RunString(bfCode)
 }
