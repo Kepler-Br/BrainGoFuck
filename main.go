@@ -50,7 +50,7 @@ func (this *BrainGoFuck) incrementCell() {
 	this.memory[this.memoryCarriage]++
 }
 
-func (this *BrainGoFuck) deincrementCell() {
+func (this *BrainGoFuck) decrementCell() {
 	this.memory[this.memoryCarriage]--
 }
 
@@ -59,9 +59,13 @@ func (this *BrainGoFuck) printCell(){
 }
 
 func (this *BrainGoFuck) readInput() {
-	var ololo string = ""
-	fmt.Scan(&ololo)
-	this.memory[this.memoryCarriage] = ololo[0]
+	var line = ""
+	_, err := fmt.Scan(&line)
+	if err != nil {
+		println(err)
+		panic("Oh, noes! readInput error. Contact this guy if you care: https://github.com/Kepler-Br")
+	}
+	this.memory[this.memoryCarriage] = line[0]
 }
 
 func (this *BrainGoFuck) beginLoop() {
@@ -74,7 +78,7 @@ func (this *BrainGoFuck) beginLoop() {
     loops:= -1
 	for i := this.sourceCarriage; ; i++ {
 		if i >=len(this.source) {
-			panic("OW FUCK! Not closed loop")
+			panic("Oh, noes! Maybe not closed loop. Contact this guy if code is OK: https://github.com/Kepler-Br")
 		}
 		if string(this.source[i]) == "]"{
 			loops--
@@ -97,7 +101,7 @@ func (this *BrainGoFuck) beginLoop() {
 func (this *BrainGoFuck) endLoop() {
 	if this.memory[this.memoryCarriage] == 0 {
 		if len(this.loopStack) == 0 {
-			panic("OW FUCK. STACK UNDERFLOW.")
+			panic("Oh, noes! Stack underflow. Contact this guy: https://github.com/Kepler-Br")
 		}
 		this.sourceCarriage++
 		this.loopStack = this.loopStack[:len(this.loopStack)-1]
@@ -106,8 +110,8 @@ func (this *BrainGoFuck) endLoop() {
 	}
 }
 
-func (this *BrainGoFuck) step(symbol string) {
-	switch(symbol) {
+func (this* BrainGoFuck) step(symbol string) {
+	switch symbol {
 		case ">":
 			this.nextCell()
 			break
@@ -124,7 +128,7 @@ func (this *BrainGoFuck) step(symbol string) {
 			this.incrementCell()
 			break
 		case "-":
-			this.deincrementCell()
+			this.decrementCell()
 			break
 		case "[":
 			this.beginLoop()
